@@ -89,14 +89,14 @@ def main():
     # 6. Test suite
     print("\n[6] Test suite:")
     result = subprocess.run(
-        ["pytest", "tests/", "--tb=short", "-q"],
-        capture_output=True, text=True,
+        [sys.executable, "-m", "pytest", "tests/", "--tb=short", "-q"],
+        capture_output=True, text=True, encoding="utf-8"
     )
     tests_ok = result.returncode == 0
     total += 1
     passed += check("pytest tests/ passes", tests_ok, "run: pytest tests/ -v để xem chi tiết")
     if not tests_ok:
-        lines = (result.stdout + result.stderr).strip().split("\n")
+        lines = (str(result.stdout) + str(result.stderr)).strip().split("\n")
         print("\n" + "\n".join(lines[-20:]))
 
     print(f"\n{'='*60}")

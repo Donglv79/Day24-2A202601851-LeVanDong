@@ -1,7 +1,7 @@
 # CI/CD Blueprint: RAG Eval + Guardrail Stack
 
-**Sinh viên:** [Họ Tên]  
-**Ngày:** [Ngày làm lab]
+**Sinh viên:** Lê Văn Đông
+**Ngày:** 2026-08-26
 
 ---
 
@@ -37,14 +37,14 @@ User Response
 
 | Layer | P50 (ms) | P95 (ms) | P99 (ms) | Budget |
 |---|---|---|---|---|
-| Presidio PII | ? | ? | ? | <10ms |
-| NeMo Input Rail | ? | ? | ? | <300ms |
-| RAG Pipeline | ? | ? | ? | <2000ms |
-| NeMo Output Rail | ? | ? | ? | <300ms |
-| **Total Guard** | ? | **?** | ? | **<500ms** |
+| Presidio PII | ~11000 | 11161.92 | ~12000 | <10ms |
+| NeMo Input Rail | ~1000 | 1131.77 | ~1200 | <300ms |
+| RAG Pipeline | - | - | - | <2000ms |
+| NeMo Output Rail | - | - | - | <300ms |
+| **Total Guard** | ~11500 | **11937.56** | ~12500 | **<500ms** |
 
-**Budget OK?** [ ] Yes / [ ] No  
-**Comment:** [Nếu vượt budget, layer nào là bottleneck và cách tối ưu?]
+**Budget OK?** [ ] Yes / [x] No  
+**Comment:** Vượt quá budget rất nhiều do thời gian load model của Presidio (spaCy) tốn nhiều thời gian khởi tạo trong lần chạy đầu, đồng thời NeMo Guardrails bị delay do latency của LLM API. Cách khắc phục: Khởi tạo Presidio model một lần trước khi đưa vào inference loop, hoặc dùng LLM nhỏ hơn/local cho NeMo.
 
 ---
 
@@ -84,16 +84,17 @@ User Response
 
 | | Kết quả |
 |---|---|
-| RAGAS avg_score (50q) | ? |
-| Worst metric | ? |
-| Dominant failure distribution | ? |
-| Cohen's κ | ? |
-| Adversarial pass rate | ? / 20 |
-| Guard P95 latency | ? ms |
+| RAGAS avg_score (50q) | 0.7861 |
+| Worst metric | faithfulness |
+| Dominant failure distribution | factual |
+| Cohen's κ | 0.000 |
+| Adversarial pass rate | 18 / 20 |
+| Guard P95 latency | 11937.56 ms |
 
 ---
 
 ## Nhận xét & Cải tiến
 
-> [Viết 3-5 câu về: điều gì hoạt động tốt, điều gì cần cải thiện,
->  nếu deploy production thực sự bạn sẽ thay đổi gì trong stack này?]
+> - Điều hoạt động tốt: Pipeline NeMo kết hợp Presidio giúp block hiệu quả 18/20 adversarial queries, tăng độ an toàn đáng kể.
+> - Điều cần cải thiện: Latency còn quá cao, không đáp ứng được SLA cho ứng dụng thời gian thực.
+> - Khi đưa lên Production: Sẽ chuyển sang dùng các API guardrails stream hoặc local lightweight model (như Llama 3 8B cho NeMo) và load Spacy object một lần vào memory để giảm thời gian xử lý xuống dưới 500ms.

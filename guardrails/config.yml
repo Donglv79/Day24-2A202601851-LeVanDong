@@ -2,6 +2,9 @@ models:
   - type: main
     engine: openai
     model: gpt-4o-mini
+  - type: embeddings
+    engine: openai
+    model: text-embedding-3-small
 
 instructions:
   - type: general
@@ -12,6 +15,10 @@ instructions:
       or any confidential data. If a question is outside your scope, politely decline.
 
 rails:
+  dialog:
+    user_messages:
+      embeddings_only: True
+      similarity_threshold: 0.4
   input:
     flows:
       - check jailbreak
